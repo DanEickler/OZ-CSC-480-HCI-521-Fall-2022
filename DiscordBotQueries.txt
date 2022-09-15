@@ -1,0 +1,142 @@
+# Below are the queries to be implemented for the query handling class(es).
+# These assume that CASCADE ON DELETE will be used as a contraint for the
+# foreign keys, meaning that if a primary key (such as an author's discord_id)
+# is deleted, any record who utilized that key as a foreign key will also be
+# deleted (such as any reactions made by the author.)
+
+--------------------------------------------------------------------------------
+# CREATE OPERATIONS
+--------------------------------------------------------------------------------
+
+# Add New Author to authors table
+-- addAuthor(long discord_id, String author_nickname)
+INSERT INTO authors
+VALUES(discord_id:BIGINT(64), author_nickname:VARCHAR(32));
+
+# Add New Message to messages table
+-- addMessage(long discord_id, long authors_discord_id,
+--    long text_channel_discord_id, String text_channel_nickname,
+--    String content)
+-- addMessage(long discord_id, long authors_discord_id,
+--    long text_channel_discord_id, String text_channel_nickname,
+--    String content, Date updated_at)
+INSERT INTO messages
+VALUES(discord_id:BIGINT(64), authors_discord_id:BIGINT(64),
+text_channel_discord_id:BIGINT(64),
+text_channel_nickname:VARCHAR(100), content:VARCHAR(4000),
+updated_at:DATETIME?);
+
+# Add New Emoji-Meaning pair to Dictionary table
+-- addDictionaryEntry(Emoji emoji, String meaning)
+INSERT INTO dictionary
+VALUES(emoji:VARCHAR(32), meaning:VARCHAR(32));
+
+# Add New Reaction to reactions table
+-- addReaction(long message_discord_id, long authors_discord_id, Emoji emoji)
+INSERT INTO reactions
+VALUES(message_discord_id:BIGINT(64), authors_discord_id:BIGINT(64),
+dicitonary_emoji:VARCHAR(32));
+
+--------------------------------------------------------------------------------
+# READ OPERATIONS
+--------------------------------------------------------------------------------
+
+# Get Message by id
+-- getMessage(long discord_id)
+SELECT *
+FROM messages
+WHERE discord_id = 1017232498893271060;
+
+# Get author nickname by author id
+-- getNickname(long discord_id)
+SELECT author_nickname
+FROM authors
+WHERE discord_id = 374978505777217546;
+
+# Get all messages posted by author id
+-- getMessagesByAuthor(long authors_discord_id)
+SELECT *
+FROM messages
+WHERE authors_discord_id = 374978505777217546;
+
+# Get all reactions and reactors by message_discord_id
+-- getReactionsAndReactors(long message_discord_id)
+SELECT *
+FROM reactions
+WHERE message_discord_id = 1017231194120794112;
+
+# Get all messages with specified reaction
+-- getMessagesByReaction(Emoji dictionary_emoji)
+SELECT messages.discord_id, messages.authors_discord_id,
+text_channel_discord_id, text_channel_nickname, content, updated_at
+FROM reactions, messages
+WHERE message_discord_id = messages.discord_id
+AND dictionary_emoji = '😛';
+
+# Get all messages with specified meaning
+-- getMessagesByMeaning(String meaning)
+SELECT DISTINCT messages.discord_id, messages.authors_discord_id,
+text_channel_discord_id, text_channel_nickname, content, updated_at
+FROM reactions, dictionary, messages
+WHERE message_discord_id = messages.discord_id
+AND dictionary_emoji = dictionary.emoji
+AND meaning = "happy";
+
+--------------------------------------------------------------------------------
+# UPDATE OPERATIONS
+--------------------------------------------------------------------------------
+
+# Edit a message
+-- updateMessage(long discord_id, String content, Date updated_at)
+UPDATE messages
+SET
+content = 'content',
+updated_at = 'updated_at'
+WHERE
+discord_id = 'discord_id';
+
+# Edit a user's Nickname
+-- updateAuthorNickname(long discord_id, String author_nickname)
+UPDATE authors
+SET
+author_nickname = 'author_nickname'
+WHERE
+discord_id = 'discord_id'
+
+--------------------------------------------------------------------------------
+# DELETE OPERATIONS
+--------------------------------------------------------------------------------
+
+# Delete all records of and by specified author. This assumes CASCADE ON DELETE
+-- deleteAuthor(long discord_id)
+DELETE FROM authors
+WHERE discord_id = 'discord_id';
+
+# Delete a message
+-- deleteMessage(long discord_id)
+DELETE FROM messages
+WHERE discord_id = 'discord_id'
+
+# Delete an Emoji-Meaning pair
+-- deleteFromDictionary(Emoji emoji, String meaning)
+DELETE FROM dictionary
+WHERE emoji = 'emoji'
+AND meaning = 'meaning'
+
+# Delete an emoji and all associated meanings from dictionary
+-- deleteEmoji(Emoji emoji)
+DELETE FROM dictionary
+WHERE emoji = 'emoji'
+
+# Delete a meaning and all associated emoji from dictionary
+-- deleteMeaning(String meaning)
+DELETE FROM dictionary
+WHERE meaning = 'meaning'
+
+# Delete a reaction
+-- deleteReaction(long message_discord_id, long authors_discord_id,
+-- Emoji dictionary_emoji)
+DELETE FROM reactions
+WHERE message_discord_id - 'message_discord_id'
+AND authors_discord_id = 'authors_discord_id'
+AND dictionary_emoji = 'dictionary_emoji'
